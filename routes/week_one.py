@@ -65,6 +65,17 @@ def mono_alphabetic_encrypt():
     return jsonify({'encrypted_text': encrypted_text})
 
 
-@week_one_bp.route('/monoAlphabeticDecrypt')
+@week_one_bp.route('/monoAlphabeticDecrypt', methods=['GET', 'POST'])
 def mono_alphabetic_decrypt():
-    return 'monoAlphabeticDecrypt'
+    data = request.get_json()
+    ciphertext = data.get('ciphertext', '')
+    shift = data.get('shift', 0)
+    plaintext = ""
+    for char in ciphertext:
+        if char.isalpha():
+            ascii_set = ord('A') if char.isupper() else ord('a')
+            position = (ord(char) - ascii_set - shift) % 256
+            plaintext += chr(position + ascii_set)
+        else:
+            plaintext += char
+    return jsonify({'decrypted_text': plaintext})
