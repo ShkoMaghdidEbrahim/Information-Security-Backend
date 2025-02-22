@@ -3,8 +3,8 @@ from flask_cors import CORS
 from routes.week_one import week_one_bp
 
 app = Flask(__name__)
-app.register_blueprint(week_one_bp)
 CORS(app, resources={r"/*": {"origins": "*"}})
+app.register_blueprint(week_one_bp)
 
 
 @app.route('/')
@@ -13,4 +13,4 @@ def hello_world():  # put application's code here
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(port=5050, debug=True)

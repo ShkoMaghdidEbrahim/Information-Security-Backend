@@ -1,54 +1,44 @@
 from flask import Blueprint, request, jsonify
+from flask_cors import cross_origin
 
 week_one_bp = Blueprint('week_one', __name__, url_prefix='/weekOne')
 
 
-@week_one_bp.route('/caesarEncrypt', methods=['GET', 'POST'])
+@week_one_bp.route('/caesarEncrypt', methods=['POST', 'GET'])
 def caesar_encrypt():
     data = request.get_json()
     plaintext = data.get('plaintext', '')
     shift = data.get('shift', 0)
     encrypted_text = ""
     for char in plaintext:
-        if char.isalpha():
-            shift_base = ord('A') if char.isupper() else ord('a')
-            encrypted_text += chr((ord(char) - shift_base + shift) % 26 + shift_base)
-        else:
-            encrypted_text += char
+        encrypted_text += chr((ord(char) + shift) % 256)
     return jsonify({'encrypted_text': encrypted_text})
 
 
-@week_one_bp.route('/caesarDecrypt', methods=['GET', 'POST'])
+@week_one_bp.route('/caesarDecrypt', methods=['POST', 'GET'])
 def caesar_decrypt():
     data = request.get_json()
     ciphertext = data.get('ciphertext', '')
     shift = data.get('shift', 0)
     plaintext = ""
     for char in ciphertext:
-        if char.isalpha():
-            shift_amount = shift % 26
-            new_char = chr(((ord(char) - ord('A' if char.isupper() else 'a') - shift_amount) % 26) + ord(
-                'A' if char.isupper() else 'a'))
-            plaintext += new_char
-        else:
-            plaintext += char
+        shift_amount = shift % 256
+        new_char = chr(((ord(char) - shift_amount) % 256))
+        plaintext += new_char
+
     return jsonify({'decrypted_text': plaintext})
 
 
-@week_one_bp.route('/caesarAttack', methods=['GET', 'POST'])
+@week_one_bp.route('/caesarAttack', methods=['POST', 'GET'])
 def caesar_attack():
     data = request.get_json()
     ciphertext = data.get('ciphertext', '')
     results = []
     print(ciphertext)
-    for shift in range(26):
+    for shift in range(256):
         decrypted = ''
         for char in ciphertext:
-            if char.isalpha():
-                base = ord('A') if char.isupper() else ord('a')
-                decrypted += chr((ord(char) - base - shift) % 26 + base)
-            else:
-                decrypted += char
+            decrypted += chr((ord(char) - shift) % 256)
         results.append({
             'shift': shift,
             'decrypted_text': decrypted
@@ -56,26 +46,39 @@ def caesar_attack():
     return jsonify(results)
 
 
-@week_one_bp.route('/monoAlphabeticEncrypt', methods=['GET', 'POST'])
+@week_one_bp.route('/monoAlphabeticEncrypt', methods=['POST', 'GET'])
 def mono_alphabetic_encrypt():
     data = request.get_json()
     plaintext = data.get('plaintext', '')
-    shift = data.get('shift', 0)
-    encrypted_text = "".join(chr((ord(char) + shift) % 256) for char in plaintext)
-    return jsonify({'encrypted_text': encrypted_text})
+    shift = data.get('shift', {})
+    ciphertext = ""
+    for char in plaintext:
+        if char.lower() in shift:
+            cipher_char = shift[char.lower()]
+            if char.isupper():
+                ciphertext += cipher_char.upper()
+            else:
+                ciphertext += cipher_char
+        else:
+            ciphertext += char
+    return jsonify({'encrypted_text': ciphertext})
 
 
-@week_one_bp.route('/monoAlphabeticDecrypt', methods=['GET', 'POST'])
+@week_one_bp.route('/monoAlphabeticDecrypt', methods=['POST', 'GET'])
 def mono_alphabetic_decrypt():
     data = request.get_json()
     ciphertext = data.get('ciphertext', '')
-    shift = data.get('shift', 0)
+    shift = data.get('shift', {})
+    print(shift)
+    print(ciphertext)
     plaintext = ""
     for char in ciphertext:
-        if char.isalpha():
-            ascii_set = ord('A') if char.isupper() else ord('a')
-            position = (ord(char) - ascii_set - shift) % 256
-            plaintext += chr(position + ascii_set)
+        if char.lower() in shift:
+            plaintext_char = shift[char.lower()]
+            if char.isupper():
+                plaintext += plaintext_char.upper()
+            else:
+                plaintext += plaintext_char
         else:
             plaintext += char
     return jsonify({'decrypted_text': plaintext})
