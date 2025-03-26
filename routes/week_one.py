@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_cors import cross_origin
+import random
 
 week_one_bp = Blueprint('week_one', __name__, url_prefix='/weekOne')
 
@@ -46,22 +47,21 @@ def caesar_attack():
     return jsonify(results)
 
 
-@week_one_bp.route('/monoAlphabeticEncrypt', methods=['POST', 'GET'])
+@week_one_bp.route('/monoAlphabeticEncrypt', methods=['POST'])
 def mono_alphabetic_encrypt():
     data = request.get_json()
-    plaintext = data.get('plaintext', '')
-    shift = data.get('shift', {})
-    ciphertext = ""
-    for char in plaintext:
-        if char.lower() in shift:
-            cipher_char = shift[char.lower()]
-            if char.isupper():
-                ciphertext += cipher_char.upper()
-            else:
-                ciphertext += cipher_char
-        else:
-            ciphertext += char
-    return jsonify({'encrypted_text': ciphertext})
+    plaintext = data.get('plaintext', '').lower()
+
+    alphabet = [chr(i) for i in range(97, 123)]  # a-z
+    shuffled_alphabet = alphabet[:]
+    random.shuffle(shuffled_alphabet)
+
+    key_str = ''.join(shuffled_alphabet)  # Concatenated key
+    key = dict(zip(alphabet, shuffled_alphabet))
+
+    ciphertext = ''.join(key.get(char, char) for char in plaintext)
+
+    return jsonify({'encrypted_text': ciphertext, 'key': key_str})
 
 
 @week_one_bp.route('/monoAlphabeticDecrypt', methods=['POST', 'GET'])
