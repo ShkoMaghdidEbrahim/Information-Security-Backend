@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routes.week_one import router as week_one_router
+from routes.week_two import router as week_two_router
 
 app = FastAPI()
 
@@ -13,14 +14,9 @@ app.add_middleware(
 )
 
 app.include_router(week_one_router, prefix="/weekOne")
+app.include_router(week_two_router, prefix="/weekTwo")
 
 
 @app.get("/")
 def hello_world():
     return {"message": "Hello World!"}
-
-
-if __name__ == "__main__":
-    import uvicorn
-
-    uvicorn.run(app, host="0.0.0.0", port=5050, debug=True)
