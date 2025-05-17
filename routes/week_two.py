@@ -125,7 +125,7 @@ FP_TABLE = [
 
 def generate_des_keys(master_key):
     remove_parity_bits = [master_key[i] for i in range(64) if
-                          i != 8 and i != 16 and i != 24 and i != 32 and i != 40 and i != 48 and i != 56 and i != 64]
+                          i != 7 and i != 15 and i != 23 and i != 31 and i != 39 and i != 47 and i != 55 and i != 63]
 
     c_half = remove_parity_bits[:28]
     d_half = remove_parity_bits[28:]
@@ -140,7 +140,7 @@ def generate_des_keys(master_key):
         combined = c_half + d_half
 
         subkey = [combined[i] for i in range(56) if
-                  i != 9 and i != 18 and i != 22 and i != 25 and i != 35 and i != 38 and i != 43 and i != 54]
+                  i != 8 and i != 17 and i != 21 and i != 24 and i != 34 and i != 37 and i != 42 and i != 53]
         sub_keys.append(subkey)
 
     return master_key, sub_keys
@@ -225,7 +225,7 @@ def des_encrypt(request: DESEncrypt):
             l_block, r_block = des_encrypt_round(l_block, r_block, sub_keys[i])
         l_block, r_block = r_block, l_block
         combined = l_block + r_block
-        print(f"Combined Encrypt: {combined}")
+
         encrypted_block = final_permutation(combined)
         result.extend(encrypted_block)
     bytes_data = bytearray()
